@@ -19,6 +19,15 @@ exports.createIkasle = async (req, res, next) => {
     }
 };
 
+exports.deleteIkasle = async (req, res, next) => {
+    try{
+        const ikasle = await Ikasle.findByIdAndDelete(req.params.id);
+    } catch (error) {
+        next(error);
+    }
+}
+
+
 exports.getIkasleById = async (req, res, next) => {
     try {
         const ikasle = await Ikasle.findById(req.params.id);
