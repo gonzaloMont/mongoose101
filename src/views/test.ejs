@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,25 +28,96 @@
 
             const data = await response.json();
             document.getElementById('newIkasle').innerText = JSON.stringify(data, null, 2);
+
+            // comboboxa bete
+            const select = document.getElementById('editIkasleSelect');
+            const option = document.createElement('option');
+            option.text = email;
+            option.innerText = `${email}`;
+            option.value = data._id;
+            select.appendChild(option);
+
         }
 
 
         async function deleteIkasle() {
-        const id = document.getElementById("deleteId").value;
 
-        const response = await fetch(`/api/ikasleak/${id}`, {
-          method: "DELETE",
-        });
+            const id = document.getElementById("deleteId").value;
 
-        const data = await response.json();
-        document.getElementById("deletedIkasle").innerText = JSON.stringify(
-          data,
-          null,
-          2
-        );
-      }
+            const select = document.getElementById('editIkasleSelect');
+            const option = select.querySelector(`option[value="${id}"]`);
+            select.removeChild(option);
+
+
+            const response = await fetch(`/api/ikasleak/${id}`, {
+                method: "DELETE",
+            });
+
+            const data = await response.json();
+            document.getElementById("deletedIkasle").innerText = JSON.stringify(
+                data,
+                null,
+                2
+            );
+
+
+        }
+
+
+
+        async function comboboxBete() {
+            const response = await fetch('/api/ikasleak');
+            const data = await response.json();
+            const select = document.getElementById('editIkasleSelect');
+            data.forEach(ikasle => {
+                const option = document.createElement('option');
+                option.text = ikasle.email;
+                option.innerText = `${ikasle.email}`;
+                option.value = ikasle._id;
+                select.appendChild(option);
+            });
+        }
+
+        comboboxBete();
+
+
+        async function editIkasle() {
+            const id = document.getElementById('editIkasleSelect').value;
+            const izena = document.getElementById('editIzena').value;
+            const adina = document.getElementById('editAdina').value;
+            const email = document.getElementById('editEmail').value;
+
+
+
+            try {
+                const response = await fetch(`/api/ikasleak/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ izena, adina, email })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                document.getElementById("editIkasle").innerText = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error during fetch or processing:', error);
+            }
+
+
+            const select = document.getElementById('editIkasleSelect');
+            const option = select.querySelector(`option[value="${id}"]`);
+            option.text = email;
+            option.innerText = `${email}`;
+
+        }
     </script>
 </head>
+
 <body>
     <h1>Test Ikasleak API</h1>
     <button onclick="fetchIkasleak()">Get Ikasleak</button>
@@ -75,5 +146,27 @@
         <button type="submit">Delete</button>
     </form>
     <pre id="deletedIkasle"></pre>
+
+
+    <h2>Edit Ikasle</h2>
+    <form onsubmit="event.preventDefault(); editIkasle();">
+        <label for="editIkasleSelect">Ikasle email:</label>
+        <select id="editIkasleSelect" name="editIkasleSelect" required>
+            <option value="" disabled selected>Choose an ikasle</option>
+        </select>
+        <br>
+        <label for="editIzena">Izena:</label>
+        <input type="text" id="editIzena" name="editIzena" required>
+        <br>
+        <label for="editAdina">Adina:</label>
+        <input type="number" id="editAdina" name="editAdina" required>
+        <br>
+        <label for="editEmail">Email:</label>
+        <input type="email" id="editEmail" name="editEmail" required>
+        <br>
+        <button type="submit">Edit</button>
+    </form>
+    <pre id="editIkasle"></pre>
 </body>
+
 </html>

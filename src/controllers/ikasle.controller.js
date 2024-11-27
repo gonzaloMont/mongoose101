@@ -28,6 +28,19 @@ exports.deleteIkasle = async (req, res, next) => {
 }
 
 
+exports.editIkasle = async (req, res, next) => {
+    try {
+
+        const ikasle = await Ikasle.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        if (!ikasle) {
+            return res.status(404).send('Ikasle not found');
+        }
+        res.json(ikasle);
+    } catch (error) {
+        next(error);
+    }
+}
+
 exports.getIkasleById = async (req, res, next) => {
     try {
         const ikasle = await Ikasle.findById(req.params.id);

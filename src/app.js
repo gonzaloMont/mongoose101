@@ -18,6 +18,14 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Middleware-ak
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use((req, res, next) => {
+    console.log(`Método: ${req.method}, Ruta: ${req.url}`);
+    next();
+});
+
+
 
 // Static files
 app.use(express.static('public'));
@@ -40,3 +48,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Zerbitzaria martxan ${PORT} portuan`);
 });
+
