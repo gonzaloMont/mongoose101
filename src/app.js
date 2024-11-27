@@ -6,6 +6,7 @@ const express = require('express');
 const connectDB = require('./config/database');
 const ikasleRoutes = require('./routes/ikasle.routes');
 const errorHandler = require('./middleware/error.middleware');
+const taldeRoutes = require('./routes/talde.routes');
 
 const app = express();
 
@@ -15,6 +16,8 @@ connectDB();
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+
 
 // Middleware-ak
 app.use(express.json());
@@ -30,8 +33,11 @@ app.use((req, res, next) => {
 // Static files
 app.use(express.static('public'));
 
+
+
 // Routes
 app.use('/api/ikasleak', ikasleRoutes);
+app.use('/api/taldeak', taldeRoutes);
 
 app.get('/', (req, res) => {
     res.render('index');
@@ -40,6 +46,9 @@ app.get('/', (req, res) => {
 app.get('/test', (req, res) => {
     res.render('test');
 });
+
+
+
 
 // Error handling
 app.use(errorHandler);

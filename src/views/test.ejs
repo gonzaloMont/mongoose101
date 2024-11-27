@@ -12,6 +12,12 @@
             document.getElementById('ikasleak').innerText = JSON.stringify(data, null, 2);
         }
 
+        async function fetchTaldeak() {
+            const response = await fetch('/api/taldeak');
+            const data = await response.json();
+            document.getElementById('taldeak').innerText = JSON.stringify(data, null, 2);
+        }
+
 
         async function createIkasle() {
             const izena = document.getElementById('izena').value;
@@ -30,12 +36,20 @@
             document.getElementById('newIkasle').innerText = JSON.stringify(data, null, 2);
 
             // comboboxa bete
-            const select = document.getElementById('editIkasleSelect');
-            const option = document.createElement('option');
-            option.text = email;
-            option.innerText = `${email}`;
-            option.value = data._id;
-            select.appendChild(option);
+            const selectEdit = document.getElementById('editIkasleSelect');
+            const selectAssign = document.getElementById('assignIkasleSelect');
+
+            const optionEdit = document.createElement('option');
+            optionEdit.text = email;
+            optionEdit.innerText = `${email}`;
+            optionEdit.value = data._id;
+            selectEdit.appendChild(optionEdit);
+
+            const optionAssign = document.createElement('option');
+            optionAssign.text = email;
+            optionAssign.innerText = `${email}`;
+            optionAssign.value = data._id;
+            selectAssign.appendChild(optionAssign);
 
         }
 
@@ -48,24 +62,24 @@
             const option = select.querySelector(`option[value="${id}"]`);
             select.removeChild(option);
 
+            const selectAssign = document.getElementById('assignIkasleSelect');
+            const optionAssign = selectAssign.querySelector(`option[value="${id}"]`);
+            selectAssign.removeChild(optionAssign);
+
 
             const response = await fetch(`/api/ikasleak/${id}`, {
                 method: "DELETE",
             });
 
             const data = await response.json();
-            document.getElementById("deletedIkasle").innerText = JSON.stringify(
-                data,
-                null,
-                2
-            );
+            document.getElementById("deletedIkasle").innerText = JSON.stringify(data, null, 2);
 
 
         }
 
 
 
-        async function comboboxBete() {
+        async function comboboxEditBete() {
             const response = await fetch('/api/ikasleak');
             const data = await response.json();
             const select = document.getElementById('editIkasleSelect');
@@ -78,7 +92,36 @@
             });
         }
 
-        comboboxBete();
+        comboboxEditBete();
+
+
+
+        async function comboboxAssignBete() {
+            const response = await fetch('/api/ikasleak');
+            const data = await response.json();
+            const select = document.getElementById('assignIkasleSelect');
+            data.forEach(ikasle => {
+                const option = document.createElement('option');
+                option.text = ikasle.email;
+                option.innerText = `${ikasle.email}`;
+                option.value = ikasle._id;
+                select.appendChild(option);
+            });
+
+
+            const responseTalde = await fetch('/api/taldeak');
+            const dataTalde = await responseTalde.json();
+            const selectTalde = document.getElementById('editTaldeSelect');
+            dataTalde.forEach(talde => {
+                const option = document.createElement('option');
+                option.text = talde.izena;
+                option.innerText = `${talde.izena}`;
+                option.value = talde._id;
+                selectTalde.appendChild(option);
+            });
+        }
+
+        comboboxAssignBete();
 
 
         async function editIkasle() {
@@ -115,6 +158,60 @@
             option.innerText = `${email}`;
 
         }
+
+
+
+
+        async function createTalde() {
+            const izena = document.getElementById('taldeIzena').value;
+
+            const response = await fetch('/api/taldeak', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ izena })
+            });
+
+            const data = await response.json();
+            document.getElementById('newTalde').innerText = JSON.stringify(data, null, 2);
+
+            const selectTalde = document.getElementById('editTaldeSelect');
+            const optionTalde = document.createElement('option');
+            optionTalde.text = izena;
+            optionTalde.innerText = `${izena}`;
+            optionTalde.value = data._id;
+            selectTalde.appendChild(optionTalde);
+        }
+
+
+        async function assignIkasleToTalde() {
+            const taldeId = document.getElementById('editTaldeSelect').value;
+            const ikasleId = document.getElementById('assignIkasleSelect').value;
+
+            try {
+                const response = await fetch('/api/taldeak/assign', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ taldeId, ikasleId })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                const editTaldeElement = document.getElementById('editTalde');
+                editTaldeElement.innerHTML = ''; 
+                editTaldeElement.innerText = JSON.stringify(data, null, 2);
+
+            } catch (error) {
+                console.error('Error during fetch or processing:', error);
+            }
+        }
+
     </script>
 </head>
 
@@ -167,6 +264,42 @@
         <button type="submit">Edit</button>
     </form>
     <pre id="editIkasle"></pre>
+
+
+    <h2>Create Talde</h2>
+    <form onsubmit="event.preventDefault(); createTalde();">
+        <label for="izena">Talde Izena:</label>
+        <input type="text" id="taldeIzena" name="izena" required>
+        <br>
+        <button type="submit">Create</button>
+    </form>
+    <pre id="newTalde"></pre>
+
+
+
+    <h2>Assign Ikasle To Talde</h2>
+    <form onsubmit="event.preventDefault(); assignIkasleToTalde();">
+
+        <label for="editTaldeSelect">Talde:</label>
+        <select id="editTaldeSelect" name="editTaldeSelect" required>
+            <option value="" disabled selected>Choose a talde</option>
+        </select>
+        <br>
+        <label for="assignIkasleSelect">Ikasle:</label>
+        <select id="assignIkasleSelect" name="assignIkasleSelect" required>
+            <option value="" disabled selected>Choose an ikasle</option>
+        </select>
+
+        <br>
+        <button type="submit">Assign</button>
+    </form>
+    <pre id="editTalde"></pre>
+
+    <h2>Get Taldeak</h2>
+    <button onclick="fetchTaldeak()">Get Taldeak</button>
+    <pre id="taldeak"></pre>
+
+
 </body>
 
 </html>
